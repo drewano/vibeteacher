@@ -116,6 +116,8 @@ export async function POST(request: Request) {
     // Add document metadata
     curriculum.documentId = documentId
     curriculum.documentName = documentName
+    // Store PDF content for AI agent context (limit to reasonable size)
+    curriculum.pdfContent = pdfText.slice(0, 50000)
 
     return NextResponse.json(curriculum)
   } catch (error) {

@@ -31,6 +31,7 @@ export interface LearningCurriculum {
   levels: Level[]
   currentLevelId: number
   totalXp: number
+  pdfContent?: string // Full text extracted from the PDF
 }
 
 export interface UploadedDocument {
