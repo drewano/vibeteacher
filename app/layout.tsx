@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
+import { CurriculumProvider } from "@/lib/curriculum-context";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -34,7 +35,9 @@ export default function RootLayout({
 					enableSystem={false}
 					disableTransitionOnChange
 				>
-					{children}
+					<CurriculumProvider>
+						{children}
+					</CurriculumProvider>
 				</ThemeProvider>
 			</body>
 		</html>

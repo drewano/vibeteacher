@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect, useCallback } from "react"
+import { useState, useCallback } from "react"
 import { motion } from "motion/react"
 import { PanelRightOpenIcon } from "lucide-react"
 import { useConversation } from "@elevenlabs/react"
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/sheet"
 import { VoiceInterface } from "@/components/voice-interface"
 import { Workspace } from "@/components/workspace"
+import { useCurriculum } from "@/lib/curriculum-context"
 
 type AgentState =
 	| "disconnected"
@@ -44,6 +45,9 @@ export default function Home() {
 			timestamp: new Date(),
 		},
 	])
+
+	// Get curriculum context for progress tracking
+	const { curriculum } = useCurriculum()
 
 	const conversation = useConversation({
 		onConnect: () => console.log("Connected to ElevenLabs"),

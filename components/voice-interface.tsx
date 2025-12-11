@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { Volume2Icon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-// Removed Orb import as it's moved to VoiceControls
+import { MathText } from "@/components/math-text"
 
 type AgentState =
 	| "disconnected"
@@ -96,7 +96,7 @@ export function VoiceInterface({
 											: "bg-primary text-primary-foreground rounded-br-sm shadow-primary/20"
 									)}
 								>
-									<p className="text-[15px] leading-relaxed">{message.text}</p>
+									<p className="text-[15px] leading-relaxed"><MathText>{message.text}</MathText></p>
 								</div>
 								<span className="mt-2 px-2 text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider">
 									{message.role === "user" ? "Vous" : "Tuteur"} • {message.timestamp.toLocaleTimeString([], {

@@ -58,15 +58,17 @@ async function createAgent(): Promise<string> {
         name: "Math Tutor AI",
         conversation_config: {
           tts: {
-            voice_id: "21m00Tcm4TlvDq8ikWAM", // Rachel voice
-            model_id: "eleven_flash_v2",
+            voice_id: "cgSgspJ2msm6clMCkdW9", // Jessica - French multilingual voice
+            model_id: "eleven_multilingual_v2",
           },
           agent: {
             first_message:
               "Bonjour! Je suis ton professeur de mathématiques IA. Comment puis-je t'aider aujourd'hui? Tu peux me poser des questions sur n'importe quel sujet en maths!",
             prompt: {
               prompt: MATH_TUTOR_PROMPT,
+              llm: "gpt-4o-mini",
             },
+            language: "fr",
           },
         },
       }),
