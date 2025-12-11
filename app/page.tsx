@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/sheet"
 import { VoiceInterface } from "@/components/voice-interface"
 import { Workspace } from "@/components/workspace"
-import { useCurriculum } from "@/lib/curriculum-context"
 
 type AgentState =
 	| "disconnected"
@@ -24,30 +23,12 @@ type AgentState =
 	| "disconnecting"
 	| null
 
-interface TranscriptMessage {
-	id: string
-	role: "tutor" | "user"
-	text: string
-	timestamp: Date
-}
-
 export default function Home() {
 	const [isSheetOpen, setIsSheetOpen] = useState(false)
 
-	// State lifted from VoiceInterface
+	// Voice agent state
 	const [agentState, setAgentState] = useState<AgentState>("disconnected")
 	const [errorMessage, setErrorMessage] = useState<string | null>(null)
-	const [transcripts, setTranscripts] = useState<TranscriptMessage[]>([
-		{
-			id: "1",
-			role: "tutor",
-			text: "Bonjour! Je suis ton professeur de mathématiques IA. Clique sur le micro pour commencer!",
-			timestamp: new Date(),
-		},
-	])
-
-	// Get curriculum context for progress tracking
-	const { curriculum } = useCurriculum()
 
 	const conversation = useConversation({
 		onConnect: () => console.log("Connected to ElevenLabs"),
@@ -57,15 +38,8 @@ export default function Home() {
 		},
 		onMessage: (message) => {
 			console.log("Message:", message)
-			if (message.message) {
-				const newMessage: TranscriptMessage = {
-					id: Date.now().toString(),
-					role: message.source === "ai" ? "tutor" : "user",
-					text: message.message,
-					timestamp: new Date(),
-				}
-				setTranscripts((prev) => [...prev, newMessage])
-			}
+			// Messages are no longer displayed in chat bubbles
+			// The voice agent speaks directly to the user
 		},
 		onError: (error) => {
 			console.error("Error:", error)
@@ -140,7 +114,7 @@ export default function Home() {
 
 	return (
 		<div className="flex h-screen w-full overflow-hidden bg-background">
-			{/* Left Panel - Voice Interface (60% on desktop, full on mobile) */}
+			{/* Left Panel - Learning Board (60% on desktop, full on mobile) */}
 			<motion.div
 				initial={{ opacity: 0, x: -20 }}
 				animate={{ opacity: 1, x: 0 }}
@@ -148,9 +122,10 @@ export default function Home() {
 				className="relative w-full lg:w-[60%]"
 			>
 				<VoiceInterface
-					transcripts={transcripts}
 					agentState={agentState}
 					isTransitioning={isTransitioning}
+					getInputVolume={getInputVolume}
+					getOutputVolume={getOutputVolume}
 				/>
 
 				{/* Mobile Toggle Button */}

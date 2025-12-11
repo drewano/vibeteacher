@@ -1,10 +1,11 @@
 "use client"
 
 import { motion } from "motion/react"
-import { TrophyIcon, LockIcon, CheckCircle2Icon, SparklesIcon, BookOpenIcon } from "lucide-react"
+import { TrophyIcon, LockIcon, CheckCircle2Icon, SparklesIcon, BookOpenIcon, PlayIcon, BookIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Progress } from "@/components/ui/progress"
+import { Button } from "@/components/ui/button"
 import { useCurriculum } from "@/lib/curriculum-context"
 
 // Default mock levels when no curriculum is loaded
@@ -17,7 +18,15 @@ const DEFAULT_LEVELS = [
 ]
 
 export function LearningProgress() {
-  const { curriculum, isGenerating, currentLevelId, totalXp } = useCurriculum()
+  const { 
+    curriculum, 
+    isGenerating, 
+    currentLevelId, 
+    totalXp, 
+    startLesson, 
+    activeLessonId, 
+    viewMode 
+  } = useCurriculum()
 
   const levels = curriculum?.levels || DEFAULT_LEVELS
   const hasCurriculum = !!curriculum
@@ -89,6 +98,7 @@ export function LearningProgress() {
             const isCompleted = level.status === "completed"
             const isActive = level.status === "active"
             const isLocked = level.status === "locked"
+            const isCurrentlyStudying = activeLessonId === level.id && (viewMode === 'lesson' || viewMode === 'quiz')
 
             return (
               <motion.div
@@ -144,6 +154,29 @@ export function LearningProgress() {
                     </div>
                   )}
 
+                  {/* Start Lesson Button for Active Level */}
+                  {isActive && (
+                    <div className="pt-3">
+                      {isCurrentlyStudying ? (
+                        <div className="flex items-center gap-2 text-sm text-primary">
+                          <BookIcon className="h-4 w-4 animate-pulse" />
+                          <span className="font-medium">
+                            {viewMode === 'lesson' ? 'En cours d\'étude...' : 'Quiz en cours...'}
+                          </span>
+                        </div>
+                      ) : (
+                        <Button
+                          onClick={() => startLesson(level.id)}
+                          size="sm"
+                          className="gap-2 shadow-md hover:shadow-lg transition-all"
+                        >
+                          <PlayIcon className="h-4 w-4" />
+                          Commencer le cours
+                        </Button>
+                      )}
+                    </div>
+                  )}
+
                   {/* Progress Bar for Active Level */}
                   {isActive && (
                     <div className="pt-2">
@@ -155,15 +188,24 @@ export function LearningProgress() {
                     </div>
                   )}
 
-                  {/* XP Badge for Completed Levels */}
+                  {/* XP Badge and Review Button for Completed Levels */}
                   {isCompleted && (
-                    <div className="flex items-center gap-1.5 pt-1">
+                    <div className="flex items-center gap-3 pt-1">
                       <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-950/30">
                         <TrophyIcon className="h-3 w-3 text-green-600 dark:text-green-400" />
                         <span className="text-xs font-semibold text-green-700 dark:text-green-300">
                           +{level.xp} XP
                         </span>
                       </div>
+                      <Button
+                        onClick={() => startLesson(level.id)}
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 text-xs text-muted-foreground hover:text-foreground"
+                      >
+                        <BookOpenIcon className="h-3 w-3 mr-1" />
+                        Relire
+                      </Button>
                     </div>
                   )}
                 </div>

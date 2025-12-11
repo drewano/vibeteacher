@@ -66,7 +66,7 @@ async function createAgent(): Promise<string> {
               "Bonjour! Je suis ton professeur de mathématiques IA. Comment puis-je t'aider aujourd'hui? Tu peux me poser des questions sur n'importe quel sujet en maths!",
             prompt: {
               prompt: MATH_TUTOR_PROMPT,
-              llm: "gpt-4o-mini",
+              llm: "gemini-2.5-flash",
             },
             language: "fr",
           },

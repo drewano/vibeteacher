@@ -51,6 +51,9 @@ export interface ActiveQuiz {
   showExplanation: boolean
 }
 
+// View mode for the left panel (lesson flow)
+export type ViewMode = 'idle' | 'lesson' | 'quiz'
+
 interface CurriculumContextType {
   // Curriculum state
   curriculum: LearningCurriculum | null
@@ -62,6 +65,13 @@ interface CurriculumContextType {
   completeLevel: (levelId: number) => void
   resetCurriculum: () => void
   getCurrentLevel: () => Level | null
+
+  // Lesson flow state (verrouillage/déverrouillage)
+  activeLessonId: number | null
+  viewMode: ViewMode
+  startLesson: (levelId: number) => void
+  switchToQuiz: () => void
+  getActiveLesson: () => Level | null
 
   // Quiz state
   activeQuiz: ActiveQuiz | null
@@ -86,6 +96,10 @@ export function CurriculumProvider({ children }: { children: ReactNode }) {
   const [curriculum, setCurriculumState] = useState<LearningCurriculum | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [activeQuiz, setActiveQuiz] = useState<ActiveQuiz | null>(null)
+
+  // Lesson flow state
+  const [activeLessonId, setActiveLessonId] = useState<number | null>(null)
+  const [viewMode, setViewMode] = useState<ViewMode>('idle')
 
   // Document state - persisted at context level
   const [documents, setDocuments] = useState<UploadedDocument[]>([])
@@ -113,6 +127,9 @@ export function CurriculumProvider({ children }: { children: ReactNode }) {
       })),
     }
     setCurriculumState(initializedCurriculum)
+    // Reset lesson flow state when new curriculum is set
+    setActiveLessonId(null)
+    setViewMode('idle')
   }, [])
 
   const completeLevel = useCallback((levelId: number) => {
@@ -145,19 +162,57 @@ export function CurriculumProvider({ children }: { children: ReactNode }) {
       }
     })
 
-    // Clear quiz after completion
+    // Clear quiz and reset view mode after completion
     setActiveQuiz(null)
+    setActiveLessonId(null)
+    setViewMode('idle')
   }, [])
 
   const resetCurriculum = useCallback(() => {
     setCurriculumState(null)
     setActiveQuiz(null)
+    setActiveLessonId(null)
+    setViewMode('idle')
   }, [])
 
   const getCurrentLevel = useCallback(() => {
     if (!curriculum) return null
     return curriculum.levels.find((level) => level.id === currentLevelId) ?? null
   }, [curriculum, currentLevelId])
+
+  // Lesson flow management
+  const startLesson = useCallback((levelId: number) => {
+    if (!curriculum) return
+    const level = curriculum.levels.find(l => l.id === levelId)
+    if (!level || level.status === "locked") return
+
+    setActiveLessonId(levelId)
+    setViewMode('lesson')
+    setActiveQuiz(null) // Clear any previous quiz state
+  }, [curriculum])
+
+  const switchToQuiz = useCallback(() => {
+    if (activeLessonId === null || !curriculum) return
+    
+    const level = curriculum.levels.find(l => l.id === activeLessonId)
+    if (!level || !level.quiz) return
+
+    // Set up the quiz for the active lesson
+    setActiveQuiz({
+      levelId: activeLessonId,
+      quiz: level.quiz,
+      selectedAnswer: null,
+      isCorrect: null,
+      attempts: level.quizAttempts,
+      showExplanation: false,
+    })
+    setViewMode('quiz')
+  }, [activeLessonId, curriculum])
+
+  const getActiveLesson = useCallback(() => {
+    if (!curriculum || activeLessonId === null) return null
+    return curriculum.levels.find((level) => level.id === activeLessonId) ?? null
+  }, [curriculum, activeLessonId])
 
   // Quiz management
   const startQuiz = useCallback((levelId: number) => {
@@ -236,6 +291,12 @@ export function CurriculumProvider({ children }: { children: ReactNode }) {
         completeLevel,
         resetCurriculum,
         getCurrentLevel,
+        // Lesson flow state
+        activeLessonId,
+        viewMode,
+        startLesson,
+        switchToQuiz,
+        getActiveLesson,
         // Quiz state
         activeQuiz,
         startQuiz,
