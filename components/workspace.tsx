@@ -1,65 +1,82 @@
 "use client"
 
 import { useState } from "react"
-import { FileTextIcon, ActivityIcon } from "lucide-react"
+import { FileTextIcon, TrophyIcon, MicIcon } from "lucide-react"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DocumentTab } from "@/components/document-tab"
-import { ActivitiesTab } from "@/components/activities-tab"
 import { LearningProgress } from "@/components/learning-progress"
+import { VoiceControls } from "@/components/voice-controls"
 
-export function Workspace() {
-  const [activeTab, setActiveTab] = useState("documents")
+interface WorkspaceProps {
+	voiceProps?: {
+		agentState: "disconnected" | "connecting" | "connected" | "disconnecting" | null
+		isCallActive: boolean
+		isTransitioning: boolean
+		handleCall: () => void
+		getInputVolume: () => number
+		getOutputVolume: () => number
+		errorMessage: string | null
+	}
+}
 
-  return (
-    <div className="flex h-full flex-col bg-card">
-      {/* Header */}
-      <div className="border-b border-border/50 px-4 py-4">
-        <h2 className="text-lg font-semibold">Workspace</h2>
-        <p className="text-sm text-muted-foreground">
-          Manage your documents and activities
-        </p>
-      </div>
+export function Workspace({ voiceProps }: WorkspaceProps) {
+	const [activeTab, setActiveTab] = useState("agent")
 
-      {/* Tabs */}
-      <div className="flex-1 overflow-hidden">
-        <Tabs
-          value={activeTab}
-          onValueChange={setActiveTab}
-          className="flex h-full flex-col"
-        >
-          <div className="border-b border-border/50 px-4">
-            <TabsList className="h-12 w-full justify-start gap-2 bg-transparent p-0">
-              <TabsTrigger
-                value="documents"
-                className="flex items-center gap-2 data-[state=active]:bg-muted"
-              >
-                <FileTextIcon className="h-4 w-4" />
-                Documents
-              </TabsTrigger>
-              <TabsTrigger
-                value="activities"
-                className="flex items-center gap-2 data-[state=active]:bg-muted"
-              >
-                <ActivityIcon className="h-4 w-4" />
-                Activities
-              </TabsTrigger>
-            </TabsList>
-          </div>
+	return (
+		<div className="flex h-full flex-col bg-background/50 backdrop-blur-sm">
+			{/* Header removed for minimalism - tabs act as header */}
 
-          <div className="flex-1 overflow-y-auto">
-            <TabsContent value="documents" className="m-0 h-full">
-              <DocumentTab />
-            </TabsContent>
-            <TabsContent value="activities" className="m-0 h-full">
-              <ActivitiesTab />
-            </TabsContent>
-          </div>
-        </Tabs>
-      </div>
+			{/* Tabs */}
+			<Tabs
+				value={activeTab}
+				onValueChange={setActiveTab}
+				className="flex h-full flex-col"
+			>
+				<div className="px-8 pt-8 pb-0">
+					<TabsList className="h-14 w-full justify-start gap-8 bg-transparent p-0 border-b border-border/60">
+						<TabsTrigger
+							value="agent"
+							className="group relative flex items-center gap-2.5 rounded-none border-b-[3px] border-transparent px-1 pb-4 pt-2 text-base font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
+						>
+							<MicIcon className="h-4.5 w-4.5" />
+							<span>Agent</span>
+						</TabsTrigger>
+						<TabsTrigger
+							value="documents"
+							className="group relative flex items-center gap-2.5 rounded-none border-b-[3px] border-transparent px-1 pb-4 pt-2 text-base font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
+						>
+							<FileTextIcon className="h-4.5 w-4.5" />
+							<span>Documents</span>
+						</TabsTrigger>
+						<TabsTrigger
+							value="xp"
+							className="group relative flex items-center gap-2.5 rounded-none border-b-[3px] border-transparent px-1 pb-4 pt-2 text-base font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-foreground data-[state=active]:shadow-none"
+						>
+							<TrophyIcon className="h-4.5 w-4.5" />
+							<span>XP</span>
+						</TabsTrigger>
+					</TabsList>
+				</div>
 
-      {/* Learning Progress */}
-      <LearningProgress />
-    </div>
-  )
+				<div className="flex-1 overflow-hidden">
+					<TabsContent value="agent" className="m-0 h-full p-6 outline-none data-[state=inactive]:hidden">
+						{voiceProps && (
+							<div className="h-full flex items-center justify-center">
+								<VoiceControls {...voiceProps} />
+							</div>
+						)}
+					</TabsContent>
+
+					<TabsContent value="documents" className="m-0 h-full overflow-y-auto px-6 py-6 outline-none data-[state=inactive]:hidden">
+						<DocumentTab />
+					</TabsContent>
+
+					<TabsContent value="xp" className="m-0 h-full overflow-y-auto px-6 py-6 outline-none data-[state=inactive]:hidden">
+						<LearningProgress />
+					</TabsContent>
+				</div>
+			</Tabs>
+		</div>
+	)
 }
